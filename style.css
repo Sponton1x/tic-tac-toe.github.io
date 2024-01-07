@@ -1,0 +1,92 @@
+body {
+    font-family: monospace;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #333;
+}
+
+#game-modes {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+#game-mode-link {
+    text-emphasis: none;
+    color: #333;
+}
+
+#game-mode {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+#game-icon {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 15px;
+}
+
+#game-mode:hover {
+    transform: scale(1.05);
+    transform: transform 0.3s ease-in-out;
+}
+
+button {
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+    margin: 5px;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 5px;
+    margin: 20px auto;
+    max-width: 200px;
+}
+
+#reset-btn {
+    width: 80px;
+    height: 70px;
+}
+
+#currnetPlayer-text {
+    text-align: center;
+}
+
+#footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+}
+
+#footer p {
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#main {
+    flex: 1;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: monospace;
+}
