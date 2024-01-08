@@ -1,6 +1,8 @@
 const board = document.getElementById('board');
 const outputBoard = document.getElementById('output-board');
 const resultsTable = document.getElementById('resultsTable').getElementsByTagName('tbody')[0];
+const summraryTable = document.getElementById('summraryTable').getElementsByTagName('tbody')[0];
+const rows = resultsTable.getElementsByTagName('tr');
 
 let currentPlayer = 'X';
 let gameBoard = ['', '', '', '', '', '', '', '', ''];
@@ -80,12 +82,43 @@ function resetGame() {
     updateCurrentPlayerText();
 }
 
+function winCounter() {
+    let winCircle = 0;
+    let winCross = 0;
+    let draws = 0;
+
+
+    for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName('td');
+        if (cells.length === 1) {
+            const result = cells[0].textContent;
+            if (result === 'Gracz O') {
+                winCircle++;
+            } else if (result === 'Gracz X') {
+                winCross++;
+            } else if (result === 'Remis') {
+                draws++;
+            }
+        }
+    }
+}
+
 
 function addResult(result) {
-    const newRow = resultsTable.insertRow();
-    const cell1 = newRow.insertCell(0);
+    // Results Table
+    const resultsRow = resultsTable.insertRow();
+    const resultCell = resultsRow.insertCell(0);
+    resultCell.textContent = result;
 
-    cell1.textContent = result;
+    // Summrary Table
+    const summraryRow = summraryTable.insertRow();
+    const summraryCellCross = summraryRow.insertCell(0);
+    const summraryCellCircle = summraryRow.insertCell(1);
+    const summraryCellDraw = summraryRow.insertCell(1);
+    summraryCellCross.textContent = winCross;
+    summraryCellCircle.textContent = winCircle;
+    summraryCellDraw.textContent = draws;
+
 
     // Save data to localStorage
     saveResultsToLocalStorage();
@@ -97,9 +130,10 @@ function addResult(result) {
 
 function saveResultsToLocalStorage() {
     const resultsData = [];
+    const summraryData = [];
     for (let i = 0; i < resultsTable.rows.length; i++) {
         const result = resultsTable.rows[i].cells[0].textContent;
-        resultsData.push({ round, result });
+        resultsData.push({ result });
     }
     localStorage.setItem('resultsData', JSON.stringify(resultsData));
 }
@@ -117,7 +151,6 @@ function loadResultsFromLocalStorage() {
         }
     }
 }
-
 
 function updateResultsTableInHTML() {
     console.log('Updating results table...');
