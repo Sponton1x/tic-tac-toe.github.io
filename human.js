@@ -1,13 +1,13 @@
 const board = document.getElementById('board');
 const outputBoard = document.getElementById('output-board');
+const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
 const resultsTable = document.getElementById('resultsTable').getElementsByTagName('tbody')[0];
-const summraryTable = document.getElementById('summraryTable').getElementsByTagName('tbody')[0];
-const rows = resultsTable.getElementsByTagName('tr');
 
 let currentPlayer = 'X';
 let gameBoard = ['', '', '', '', '', '', '', '', ''];
-let gameOver = false;
-let roundCounter = document.getElementById('reset-btn');
+let winCircle = 0;
+let winCross = 0;
+let draws = 0;
 
 function checkWinner() {
     const winPatterns = [
@@ -31,12 +31,12 @@ function checkDraw() {
 }
 
 function updateCurrentPlayerText() {
-    const currentPlayerText = document.getElementById("currentPlayer-text")
-    currentPlayerText.textContent = `Teraz gracz ${currentPlayer}`
+    const currentPlayerText = document.getElementById("currentPlayer-text");
+    currentPlayerText.textContent = `Teraz gracz ${currentPlayer}`;
 }
 
 function handleCellClick(index) {
-    if (gameBoard[index] || gameOver) return;
+    if (gameBoard[index] || checkWinner() || checkDraw()) return;
 
     gameBoard[index] = currentPlayer;
     renderBoard();
@@ -47,15 +47,11 @@ function handleCellClick(index) {
 
     if (winner) {
         alert(`Gracz ${winner} wygrał!`);
-        gameOver = true;
-        updateCurrentPlayerText();
         addResult(`Gracz ${winner}`);
         handleGameEnd();
     } else if (draw) {
         alert('Jest remis!');
-        gameOver = true;
-        updateCurrentPlayerText();
-        addResult("Remis");
+        addResult('Remis');
         handleGameEnd();
     } else {
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
@@ -65,7 +61,6 @@ function handleCellClick(index) {
 
 function renderBoard() {
     board.innerHTML = '';
-    board.getElementById
     for (let i = 0; i < 9; i++) {
         const cell = document.createElement('button');
         cell.textContent = gameBoard[i];
@@ -77,32 +72,9 @@ function renderBoard() {
 function resetGame() {
     currentPlayer = 'X';
     gameBoard = ['', '', '', '', '', '', '', '', ''];
-    gameOver = false;
     renderBoard();
     updateCurrentPlayerText();
 }
-
-function winCounter() {
-    let winCircle = 0;
-    let winCross = 0;
-    let draws = 0;
-
-
-    for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName('td');
-        if (cells.length === 1) {
-            const result = cells[0].textContent;
-            if (result === 'Gracz O') {
-                winCircle++;
-            } else if (result === 'Gracz X') {
-                winCross++;
-            } else if (result === 'Remis') {
-                draws++;
-            }
-        }
-    }
-}
-
 
 function addResult(result) {
     // Results Table
@@ -110,40 +82,79 @@ function addResult(result) {
     const resultCell = resultsRow.insertCell(0);
     resultCell.textContent = result;
 
-    // Summrary Table
-    const summraryRow = summraryTable.insertRow();
-    const summraryCellCross = summraryRow.insertCell(0);
-    const summraryCellCircle = summraryRow.insertCell(1);
-    const summraryCellDraw = summraryRow.insertCell(1);
-    summraryCellCross.textContent = winCross;
-    summraryCellCircle.textContent = winCircle;
-    summraryCellDraw.textContent = draws;
-
+    // Summary Table
+    const summaryRow = summaryTable.insertRow();
+    const summaryCellCross = summaryRow.insertCell(0);
+    const summaryCellCircle = summaryRow.insertCell(1);
+    const summaryCellDraw = summaryRow.insertCell(2);
+    summaryCellCross.textContent = winCross;
+    summaryCellCircle.textContent = winCircle;
+    summaryCellDraw.textContent = draws;
 
     // Save data to localStorage
     saveResultsToLocalStorage();
-
-    // Add data to tabelę HTML
-    updateResultsTableInHTML();
 }
 
+function updateSummaryTable() {
+    // Summary Table
+    summaryTable.innerHTML = '';
+
+    const summaryRow = summaryTable.insertRow();
+    const summaryCellCross = summaryRow.insertCell(0);
+    const summaryCellCircle = summaryRow.insertCell(1);
+    const summaryCellDraw = summaryRow.insertCell(2);
+    summaryCellCross.textContent = winCross;
+    summaryCellCircle.textContent = winCircle;
+    summaryCellDraw.textContent = draws;
+
+    // Save data to localStorage
+    saveResultsToLocalStorage();
+}
 
 function saveResultsToLocalStorage() {
+    const summaryData = {
+        cross: winCross,
+        circle: winCircle,
+        draw: draws
+    };
+
     const resultsData = [];
-    const summraryData = [];
+
     for (let i = 0; i < resultsTable.rows.length; i++) {
         const result = resultsTable.rows[i].cells[0].textContent;
         resultsData.push({ result });
     }
+
+    localStorage.setItem('summaryData', JSON.stringify(summaryData));
     localStorage.setItem('resultsData', JSON.stringify(resultsData));
 }
 
 function loadResultsFromLocalStorage() {
+    const summaryDataString = localStorage.getItem('summaryData');
+    if (summaryDataString) {
+        const summaryData = JSON.parse(summaryDataString);
+
+        if (
+            summaryData &&
+            typeof summaryData.cross === 'number' &&
+            typeof summaryData.circle === 'number' &&
+            typeof summaryData.draw === 'number'
+        ) {
+            winCross = summaryData.cross;
+            winCircle = summaryData.circle;
+            draws = summaryData.draw;
+
+            updateSummaryTable();
+        } else {
+            console.error('Incorrect type data in LocalStorage.');
+        }
+    }
+
     const resultsDataString = localStorage.getItem('resultsData');
     if (resultsDataString) {
         const resultsData = JSON.parse(resultsDataString);
-        resultsTable.innerHTML = '';
 
+        resultsTable.innerHTML = '';
         for (const { result } of resultsData) {
             const newRow = resultsTable.insertRow();
             const cell1 = newRow.insertCell(0);
@@ -152,36 +163,30 @@ function loadResultsFromLocalStorage() {
     }
 }
 
-function updateResultsTableInHTML() {
-    console.log('Updating results table...');
-    const resultsData = getResultsFromLocalStorage();
-    resultsTable.innerHTML = '';
-
-    for (const { result } of resultsData) {
-        const newRow = resultsTable.insertRow();
-        const cell1 = newRow.insertCell(0);
-        cell1.textContent = result;
-    }
-    console.log('Results table updated.');
-}
-
-function getResultsFromLocalStorage() {
-    const resultsDataString = localStorage.getItem('resultsData');
-    return resultsDataString ? JSON.parse(resultsDataString) : [];
-}
-
 function handleGameEnd() {
-    saveResultsToLocalStorage();
-    updateResultsTableInHTML();
+    if (checkWinner() === 'O') {
+        winCircle++;
+    } else if (checkWinner() === 'X') {
+        winCross++;
+    } else if (checkDraw()) {
+        draws++;
+    }
+    updateSummaryTable();
+    resetGame();
 }
 
 function resetTable() {
     localStorage.clear();
+    summaryTable.innerHTML = '';
     resultsTable.innerHTML = '';
+    winCircle = 0;
+    winCross = 0;
+    draws = 0;
+    updateSummaryTable();
 }
 
 window.onload = function () {
-    loadResultsFromLocalStorage();
     renderBoard();
+    loadResultsFromLocalStorage();
     updateCurrentPlayerText();
 }
