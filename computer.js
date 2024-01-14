@@ -1,11 +1,14 @@
 const board = document.getElementById('board');
 const outputBoard = document.getElementById('output-board');
 const resultsTable = document.getElementById('resultsTable').getElementsByTagName('tbody')[0];
+const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
 
 let currentPlayer = 'X';
 let gameBoard = ['', '', '', '', '', '', '', '', ''];
 let gameOver = false;
-let roundCounter = document.getElementById('reset-btn');
+let winCross = 0;
+let winCircle = 0;
+let draws = 0;
 
 function checkWinner() {
     const winPatterns = [
@@ -27,7 +30,6 @@ function checkWinner() {
 function checkDraw() {
     return !gameBoard.includes('');
 }
-
 
 function updateCurrentPlayerText() {
     const currentPlayerText = document.getElementById("currentPlayer-text")
@@ -105,7 +107,6 @@ function makeComputerMove() {
         const winner = checkWinner();
         const draw = checkDraw();
 
-
         if (winner) {
             alert(`Gracz ${winner} wygrał!`);
             gameOver = true;
@@ -134,29 +135,61 @@ function resetGame() {
 }
 
 function addResult(result) {
-    const newRow = resultsTable.insertRow();
-    const cell1 = newRow.insertCell(0);
+    // Results Table
+    const resultsRow = resultsTable.insertRow();
+    const resultCell = resultsRow.insertCell(0);
+    resultCell.textContent = result;
 
-    cell1.textContent = result;
+    // Summary Table
+    const summaryRow = summaryTable.insertRow();
+    const summaryCellCross = summaryRow.insertCell(0);
+    const summaryCellCircle = summaryRow.insertCell(1);
+    const summaryCellDraw = summaryRow.insertCell(2);
+    summaryCellCross.textContent = winCross;
+    summaryCellCircle.textContent = winCircle;
+    summaryCellDraw.textContent = draws;
 
     // Save data to localStorage
     saveResultsToLocalStorage();
-
-    // Add data to tabelę HTML
-    updateResultsTableInHTML();
 }
 
-
 function saveResultsToLocalStorage() {
+    const summaryData = {
+        cross: winCross,
+        circle: winCircle,
+        draw: draws
+    };
+
     const resultsData = [];
     for (let i = 0; i < resultsTable.rows.length; i++) {
         const result = resultsTable.rows[i].cells[0].textContent;
-        resultsData.push({ round, result });
+        resultsData.push({ result });
     }
+    localStorage.setItem('summaryData', JSON.stringify(summaryData));
     localStorage.setItem('resultsData', JSON.stringify(resultsData));
 }
 
 function loadResultsFromLocalStorage() {
+    const summaryDataString = localStorage.getItem('summaryData');
+    if (summaryDataString) {
+        const summaryData = JSON.parse(summaryDataString);
+
+        if (
+            summaryData &&
+            typeof summaryData.cross === 'number' &&
+            typeof summaryData.circle === 'number' &&
+            typeof summaryData.draw === 'number'
+        ) {
+            winCross = summaryData.cross;
+            winCircle = summaryData.circle;
+            draws = summaryData.draw;
+
+            updateSummaryTable();
+        } else {
+            console.error('Incorrect type data in LocalStorage.');
+        }
+    }
+
     const resultsDataString = localStorage.getItem('resultsData');
     if (resultsDataString) {
         const resultsData = JSON.parse(resultsDataString);
@@ -170,33 +203,43 @@ function loadResultsFromLocalStorage() {
     }
 }
 
+function updateSummaryTable() {
+    // Summary Table
+    summaryTable.innerHTML = '';
 
-function updateResultsTableInHTML() {
-    console.log('Updating results table...');
-    const resultsData = getResultsFromLocalStorage();
-    resultsTable.innerHTML = '';
+    const summaryRow = summaryTable.insertRow();
+    const summaryCellCross = summaryRow.insertCell(0);
+    const summaryCellCircle = summaryRow.insertCell(1);
+    const summaryCellDraw = summaryRow.insertCell(2);
+    summaryCellCross.textContent = winCross;
+    summaryCellCircle.textContent = winCircle;
+    summaryCellDraw.textContent = draws;
 
-    for (const { result } of resultsData) {
-        const newRow = resultsTable.insertRow();
-        const cell1 = newRow.insertCell(0);
-        cell1.textContent = result;
-    }
-    console.log('Results table updated.');
-}
-
-function getResultsFromLocalStorage() {
-    const resultsDataString = localStorage.getItem('resultsData');
-    return resultsDataString ? JSON.parse(resultsDataString) : [];
+    // Save data to localStorage
+    saveResultsToLocalStorage();
 }
 
 function handleGameEnd() {
-    saveResultsToLocalStorage();
-    updateResultsTableInHTML();
+    if (checkWinner() === 'O') {
+        winCircle++;
+    } else if (checkWinner() === 'X') {
+        winCross++;
+    } else if (checkDraw()) {
+        draws++;
+    }
+
+    updateSummaryTable();
+    resetGame()
 }
 
 function resetTable() {
     localStorage.clear();
     resultsTable.innerHTML = '';
+    summaryTable.innerHTML = '';
+    winCircle = 0;
+    winCross = 0;
+    draws = 0;
+    updateSummaryTable();
 }
 
 window.onload = function () {
