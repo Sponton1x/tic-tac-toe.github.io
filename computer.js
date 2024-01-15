@@ -2,6 +2,7 @@ const board = document.getElementById('board');
 const outputBoard = document.getElementById('output-board');
 const resultsTable = document.getElementById('resultsTable').getElementsByTagName('tbody')[0];
 const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
+const GameLevel = document.cookie;
 
 let currentPlayer = 'X';
 let gameBoard = ['', '', '', '', '', '', '', '', ''];
@@ -65,7 +66,12 @@ function handleCellClick(index) {
 
         // Computer move after player move
         if (currentPlayer == 'O' && !gameOver) {
-            makeComputerMove();
+            if (GameLevel === "mode: hard") {
+                minimax();
+            }
+            else if (GameLevel === "mode: easy") {
+                makeComputerMove();
+            }
         }
     }
 }
@@ -124,6 +130,52 @@ function makeComputerMove() {
             updateCurrentPlayerText();
         }
     }, 300); // Set delay for computer moves for better visualluzation
+}
+
+// Harder mode than used random generated index
+function minimax(board, maxPlayer) {
+    const currentPlayer = maxPlayer ? 'O' : 'X';
+
+    if (winner === 'O') {
+        return { score: 1 }
+    }
+    else if (winner === 'X') {
+        return { score: -1 }
+    }
+    else if (checkDraw()) {
+        return { score: 0 }
+    }
+
+    const avaliablesMoves = [];
+    for (let i = 0; i < board.length; i++) {
+        if (board[i] === ''){
+            avaliablesMoves.push(i);
+        }
+    }
+
+    // Recursion
+    const moves = [];
+    for (let i = 0; i < avaliablesMoves.length; i++) {
+        const move = avaliablesMoves[i];
+        const newBoard = [...board];    
+        newBoard[move] = currentPlayer;
+        
+        const result = minimax(newBoard, !maxPlayer);
+        moves.push({ move, score: result.score });
+    }
+
+    // Choice best move for player
+    let bestMove;
+    if (maxPlayer) {
+        const maxScore = Math.max(...moves.map((m) => m.score));
+        bestMove = moves.find((m) => m.score === maxScore);
+    }
+    else {
+        const minScore = Math.min(...moves.map((m) => m.score));
+        bestMove = moves.find((m) => m.score === minScore);
+    }
+
+    return bestMove;
 }
 
 function resetGame() {
@@ -230,6 +282,10 @@ function handleGameEnd() {
 
     updateSummaryTable();
     resetGame()
+}
+
+function choiceGameLevel() {
+
 }
 
 function resetTable() {
