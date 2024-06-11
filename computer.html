@@ -8,23 +8,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
-
-    <h2>Wybierz Poziom Trudności</h2>
-    <form id="difficultyForm">
-      <label for="difficulty">Poziom trudności:</label>
-      <select id="difficulty" name="difficulty" required>
-        <option value="easy">Łatwy</option>
-        <option value="hard">Trudny</option>
-      </select>
-      <button type="button" onclick="setDifficulty()">Zatwierdź</button>
-    </form>
-
     <main class="container">
+        <div class="selector">
+            <h2>Wybierz Poziom Trudności</h2>
+                <form id="difficultyForm">
+                <label for="difficulty">Poziom trudności:</label>
+                  <select id="difficulty" name="difficulty" required onchange="choiceGameLevel(this.value)">
+                    <option value="selector">Poziom</option>
+                    <option value="easy">Łatwy</option>
+                    <option value="hard">Trudny</option>
+                  </select>
+                </form>
+        </div>
+        
         <div class="row">
             <div class="col-md-6">
                 <h1>Kółko i Krzyżyk</h1>
                 <p id="currentPlayer-text">Zacznij Grę</p>
-                <div id="board"></div>
+                <div id="board" hidden></div>
                 <div id="output-board"></div>
                 <button id="reset-btn" onclick="resetGame()" class="btn btn-primary mt-3">Resetuj grę</button>
                 <button id="reset-btn" onclick="resetTable()" class="btn btn-primary mt-3">Resetuj Tabelę</button>
@@ -58,19 +59,6 @@
     </footer>
 
     <script src="static/computer.js"></script>
-    <script>
-        function setDifficulty() {
-            const difficultySelect = document.getElementById('difficulty');
-            const selectedDifficulty = difficultySelect.value;
-
-            if (selectedDifficulty) { 
-                document.cookie = `mode=${difficulty}; expires=Thu, 01 Jan 2030 00:00:00 UTC; path=/`;
-                alert(`Wybrano poziom trudności: ${difficulty}`);
-            } else {
-                alert("Błąd => Nie wybrano poziomu. Wybierz poziom trudności.");
-            }
-        }
-      </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap/5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
