@@ -36,7 +36,7 @@ h1 {
 
 #game-mode:hover {
     transform: scale(1.05);
-    transform: transform 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out;
 }
 
 button {
@@ -44,6 +44,28 @@ button {
     height: 60px;
     font-size: 20px;
     margin: 5px;
+}
+
+.container {
+    padding-top: 50px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.selector {
+    text-align: center;
+    margin-bottom: 30px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 #board {
@@ -57,9 +79,10 @@ button {
 #reset-btn {
     width: 80px;
     height: 70px;
+    transition: transform 0.3s ease-in-out;
 }
 
-#currnetPlayer-text {
+#currentPlayer-text {
     text-align: center;
 }
 
@@ -75,18 +98,12 @@ button {
     text-align: center;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-#main {
-    flex: 1;
-}
-
 table {
     border-collapse: collapse;
     width: 100%;
     font-family: monospace;
+}
+
+#selector {
+    text-align: center;
 }
